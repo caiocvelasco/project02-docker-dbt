@@ -1,4 +1,4 @@
-# End-to-End Data Science Project
+# ETL Pipeline with dbt (Dockerized Postgres, Jupyter Notebook, and dbt).
 
 (WORK IN PROGRESS)
 
@@ -20,12 +20,24 @@
     - devcontainer.json
     - **.dbt**
       - profiles.yml
+    - **analyses**
+    - **logs** (ignored)
+      - dbt.log
+    - **macros**
+    - **models**
+      - my_first_dbt_model.sql
+      - my_second_dbt_model.sql
+      - schema.sql
+    - **seeds**
+    - **snapshots**
+    - **target** (ignored)
+    - **tests**
     - **.env**
     - **.gitignore**
     - **.python-version**
+    - **dbt_project.yml**
     - **Dockerfile**
     - **docker-compose.yml**
-    - **dbt_project.yml**
     - **requirements.txt**
     - **README.md**
 
