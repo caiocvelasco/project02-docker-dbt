@@ -21,6 +21,27 @@ services:
     networks:
       - etl_network
 
+  python:
+    restart: unless-stopped
+    build: # This 'build' tells docker-compose: don't just use the image, but build it from the Dockerfile
+      context: .
+      dockerfile: Dockerfile
+    image: python # The python service is using a custom image named "python" (check in cmd: docker ps)
+    container_name: python
+    env_file:
+      - ./.env
+    volumes:
+      - .:/workspace
+    #  - ~/.ssh:/root/.ssh  # Mount SSH directory into the container
+    working_dir: /workspace 
+    depends_on:
+      - postgres # Name of the service/image that is build before, generating dependency
+    stdin_open: true
+    tty: true
+    command: sleep infinity # Add this line to keep the container running
+    networks:
+      - etl_network
+
   dbt:
     build:
       context: .
@@ -72,23 +93,3 @@ volumes:
   #       - postgres
 
   # Note: Since dbt can also run Python code, having a separate python service is redundant.
-  # python:
-  #   restart: unless-stopped
-  #   build: # This 'build' tells docker-compose: don't just use the image, but build it from the Dockerfile
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   image: python # The python service is using a custom image named "python" (check in cmd: docker ps)
-  #   container_name: python
-  #   env_file:
-  #     - ./.env
-  #   volumes:
-  #     - .:/workspace
-  #   #  - ~/.ssh:/root/.ssh  # Mount SSH directory into the container
-  #   working_dir: /workspace 
-  #   depends_on:
-  #     - postgres # Name of the service/image that is build before, generating dependency
-  #   stdin_open: true
-  #   tty: true
-  #   command: sleep infinity # Add this line to keep the container running
-  #   networks:
-  #     - etl_network
