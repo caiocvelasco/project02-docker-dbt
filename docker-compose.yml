@@ -17,42 +17,21 @@ services:
       - "5432"
     volumes:
       - pgdata:/var/lib/postgresql/data # This volume specifies the postgres storage path
-    #  - ~/.ssh:/root/.ssh  # Mount SSH directory into the container
-    networks:
-      - etl_network
-
-  python:
-    restart: unless-stopped
-    build: # This 'build' tells docker-compose: don't just use the image, but build it from the Dockerfile
-      context: .
-      dockerfile: Dockerfile
-    image: python # The python service is using a custom image named "python" (check in cmd: docker ps)
-    container_name: python
-    env_file:
-      - ./.env
-    volumes:
-      - .:/workspace
-    #  - ~/.ssh:/root/.ssh  # Mount SSH directory into the container
-    working_dir: /workspace 
-    depends_on:
-      - postgres # Name of the service/image that is build before, generating dependency
-    stdin_open: true
-    tty: true
-    command: sleep infinity # Add this line to keep the container running
+      #  - ~/.ssh:/root/.ssh  # Mount SSH directory into the container
     networks:
       - etl_network
 
   dbt:
-    container_name: dbt
     build:
       context: .
       dockerfile: Dockerfile
+    container_name: dbt
     env_file:
       - ./.env
     volumes:
       - .:/workspace
-    #  - ~/.ssh:/root/.ssh
       - ./.dbt:/root/.dbt  # Mount the local .dbt directory
+      #  - ~/.ssh:/root/.ssh
     working_dir: /workspace
     depends_on:
       - postgres
@@ -64,20 +43,22 @@ services:
       image: jupyter/minimal-notebook
       container_name: jupyter_notebook
       restart: unless-stopped
-      environment:
-        - JUPYTER_TOKEN=123
-      #  - JUPYTER_ENABLE_LAB: "yes"
+      env_file:
+        - ./.env
       ports:
         - "8888:8888"
       volumes:
         - .:/workspace
-      #  - ~/.ssh:/root/.ssh  # Mount SSH directory into the container
+        #  - ~/.ssh:/root/.ssh  # Mount SSH directory into the container
       working_dir: /workspace # Explicitly set the working directory for the Jupyter Notebook service to /workspace. Thus, os.getcwd() should return /workspace when executed within the Jupyter Notebook environment.
       depends_on:
         - postgres
-        - python
+        - dbt
       networks:
         - etl_network
+
+volumes:
+  pgdata:
 
   # pgadmin:
   #     image: dpage/pgadmin4
@@ -90,5 +71,24 @@ services:
   #     depends_on:
   #       - postgres
 
-volumes:
-  pgdata:
+  # Note: Since dbt can also run Python code, having a separate python service is redundant.
+  # python:
+  #   restart: unless-stopped
+  #   build: # This 'build' tells docker-compose: don't just use the image, but build it from the Dockerfile
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   image: python # The python service is using a custom image named "python" (check in cmd: docker ps)
+  #   container_name: python
+  #   env_file:
+  #     - ./.env
+  #   volumes:
+  #     - .:/workspace
+  #   #  - ~/.ssh:/root/.ssh  # Mount SSH directory into the container
+  #   working_dir: /workspace 
+  #   depends_on:
+  #     - postgres # Name of the service/image that is build before, generating dependency
+  #   stdin_open: true
+  #   tty: true
+  #   command: sleep infinity # Add this line to keep the container running
+  #   networks:
+  #     - etl_network

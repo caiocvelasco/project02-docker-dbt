@@ -28,8 +28,6 @@
     - **dbt_project.yml**
     - **requirements.txt**
     - **README.md**
-    - **init.sql** (to be deprecated after dbt is installed)
-    - **ingest_fake_data.py** (to be deprecated after dbt is installed)
 
 ## Setup Instructions
 
